@@ -15,7 +15,8 @@ header small{display:block;color:var(--mut);font-weight:400;font-size:12px;margi
 #regions{position:fixed;right:14px;top:calc(env(safe-area-inset-top,0px) + 64px);width:210px;display:flex;flex-direction:column;gap:8px;z-index:2}
 #regions h3{margin:0 0 2px;font-size:12px;color:var(--mut);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .reg{background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:14px;padding:14px;font-size:14px;text-align:left;cursor:pointer;backdrop-filter:blur(10px)}
-.reg.on{border-color:var(--acc);background:rgba(91,124,255,.22)}
+.reg.on,.lay.on{border-color:var(--acc);background:rgba(91,124,255,.22)}
+.lay{background:var(--panel);border:1px solid var(--line);color:var(--mut);border-radius:14px;padding:10px 14px;font-size:13px;text-align:left;cursor:pointer;backdrop-filter:blur(10px);white-space:nowrap}.lay.on{color:var(--txt)}
 #ctrl{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(560px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 14px;z-index:2;backdrop-filter:blur(10px)}
 #views{display:flex;gap:6px;margin-bottom:10px}
 .v{flex:1;background:transparent;border:1px solid var(--line);color:var(--mut);padding:8px 4px;border-radius:10px;font-size:13px;cursor:pointer}
@@ -40,12 +41,12 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--acc);height:28px}
 </style>
 </head>
 <body>
-<header>İnsan Anatomiyası | 3D İnteraktiv Atlas<small>Sürüşdür = fırlat · Çarx (scroll) = yaxınlaşdır · Kliklə = orqanı seç</small></header>
+<header>İnsan Anatomiyası | 3D İnteraktiv Atlas<small>Sürüşdür = fırlat · Çarx = yaxınlaşdır · Kliklə = struktur seç</small></header>
 <div id="side"><input id="q" placeholder="Orqan axtar…"><div id="list"></div></div><div id="label"></div>
-<div id="regions"><h3>Bölgələr</h3></div>
+<div id="regions"><h3>Qatlar / Bölmələr</h3></div>
 <div id="ctrl">
 <div id="views"></div>
-<div class="row"><span>Hissələri aralamaq (Dağıtmaq)</span><input id="ex" type="range" min="0" max="100" value="0"><button id="reset">Yenidən birləşdir</button></div>
+<div class="row"><span>Strukturları aralamaq</span><input id="ex" type="range" min="0" max="100" value="0"><button id="reset">Yenidən yığ</button></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -70,17 +71,17 @@ function bone(name,region,a,b,r,sub){
   [-.5,.5].forEach(s=>{const k=new THREE.Mesh(new THREE.SphereGeometry(r*1.7,14,12),mat(BONE));k.position.copy(d.clone().multiplyScalar(s));g.add(k)});
   return put(g,name,region,a.clone().add(b).multiplyScalar(.5),sub)}
 
-const KH='Baş və Boyun',BR='Döş Qəfəsi',BB='Qarın və Çanaq',GL='Ətraflar (Qol/Ayaq)';
+const KH='Baş və Boyun',BR='Döş Qəfəsi',BB='Qarın və Çanaq',GL='Ətraflar';
 const lungs=[];
-// Baş və Boyun
-ell('Kəllə sümüyü (Cranium)',KH,BONE,V3(0,3.2,0),[.34,.38,.38],'Os craniale');
+const MU=[['Döş əzələsi (M. pectoralis major)','Musculus pectoralis',BR,.2,2.25,.31,.2,.13,.04],['Çiyin (delta) əzələsi (M. deltoideus)','Musculus deltoideus',GL,.58,2.4,0,.1,.16,.1],['Pazı (biseps) əzələsi (M. biceps brachii)','Musculus biceps',GL,.6,2.1,.07,.055,.25,.05],['Ön qol əzələləri','Musculi antebrachii',GL,.67,1.45,.06,.05,.3,.045],['Düz qarın əzələsi (M. rectus abdominis)','Musculus rectus abdominis',BB,.07,1.25,.24,.07,.28,.035],['Dördbaşlı bud əzələsi (M. quadriceps)','Musculus quadriceps',GL,.28,.3,.08,.09,.45,.08],['Baldır əzələsi (M. gastrocnemius)','Musculus gastrocnemius',GL,.3,-.7,-.05,.07,.28,.06],['Omba əzələsi (M. gluteus maximus)','Musculus gluteus',BB,.2,.75,-.15,.17,.15,.1],['Trapesiya əzələsi (M. trapezius)','Musculus trapezius',BR,.15,2.45,-.2,.17,.25,.03],['Geniş kürək əzələsi (M. latissimus dorsi)','Musculus latissimus',BR,.28,1.85,-.2,.15,.3,.03],['Döş-körpücük əzələsi (M. sternocleidomastoideus)','Musculus sternocleidomastoideus',KH,.1,2.7,.08,.04,.18,.04],['Çeynəmə əzələsi (M. masseter)','Musculus masseter',KH,.2,2.95,.2,.04,.09,.05]];
+// Kopf
+ell('Kəllə (Cranium)',KH,BONE,V3(0,3.2,0),[.34,.38,.38],'Os craniale');
 ell('Alt çənə (Mandibula)',KH,BONE,V3(0,2.92,.14),[.22,.1,.2],'Mandibula');
 ell('Baş beyin (Cerebrum)',KH,0xe3a0b0,V3(0,3.22,0),[.27,.3,.3],'Cerebrum');
 const tr=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.55,12),mat(0xbfd3e6));put(tr,'Traxeya (Nəfəs borusu)',KH,V3(0,2.45,.1),'Trachea');
-
-// Onurğa Sütunu
+// Wirbelsäule
 for(let i=0;i<24;i++){
-  const yy=i<7?2.82-i*.055:i<19?2.42-(i-7)*.078:1.46-(i-19)*.09;
+  const y=2.78-i*.0535*(i<7?1:1)-(i>=7?0:0), yy=i<7?2.82-i*.055:i<19?2.42-(i-7)*.078:1.46-(i-19)*.09;
   const z=-.1+.07*Math.sin((yy-1)*1.7);
   const reg=i<7?KH:i<19?BR:BB;
   const n=i<7?'Boyun fəqərəsi C'+(i+1):i<19?'Döş fəqərəsi Th'+(i-6):'Bel fəqərəsi L'+(i-18);
@@ -88,8 +89,7 @@ for(let i=0;i<24;i++){
   const m=new THREE.Mesh(new THREE.CylinderGeometry(w,w*1.05,.055,14),mat(BONE));
   put(m,n,reg,V3(0,yy,z),'Vertebra')}
 const sac=new THREE.Mesh(new THREE.ConeGeometry(.12,.3,12),mat(BONE));sac.rotation.x=Math.PI;put(sac,'Oma sümüyü (Sacrum)',BB,V3(0,.92,-.12),'Os sacrum');
-
-// Qabırğalar və Döş
+// Rippen
 for(let i=0;i<12;i++){
   const r=.2+.17*Math.sin(((i+1)/12)*Math.PI*.9),arc=Math.PI*1.7;
   const g=new THREE.TorusGeometry(r,.014,8,44,arc);g.rotateZ(-Math.PI/2-arc/2);
@@ -107,7 +107,7 @@ const st=new THREE.Mesh(new THREE.BoxGeometry(.07,.6,.03),mat(BONE));put(st,'Dö
   ell('Diz qapağı (Patella)',GL,BONE,V3(s*.3,-.22,.08),[.05,.06,.03],'Patella');
   bone('Qamış sümüyü (Tibia)',GL,V3(s*.3,-.3,.02),V3(s*.3,-1.32,0),.04,'Tibia');
   ell('Ayaq sümükləri (Pes)',GL,BONE,V3(s*.3,-1.42,.12),[.07,.04,.16],'Pes');
-  // Orqanlar
+  // Organe
   lungs.push(ell('Ağciyər (Pulmo)',BR,0xe8a5a5,V3(s*.2,2.1,.02),[.17,.32,.16],'Pulmo'));
   ell('Böyrək (Ren)',BB,0x8a2a3a,V3(s*.15,1.38,-.1),[.06,.1,.05],'Ren')});
 const heart=ell('Ürək (Cor)',BR,0xc4232f,V3(.08,2.0,.14),[.12,.15,.11],'Cor');
@@ -119,24 +119,47 @@ ell('Sidik kisəsi (Vesica urinaria)',BB,0xe0c067,V3(0,.76,.12),[.08,.08,.08],'V
 ell('Dalaq (Splen)',BB,0x7a2e55,V3(.3,1.62,-.05),[.07,.11,.05],'Splen');
 ell('Mədəaltı vəzi (Pancreas)',BB,0xe0b070,V3(0,1.45,.03),[.2,.035,.05],'Pancreas');
 ell('Öd kisəsi (Vesica biliaris)',BB,0x4a8a3a,V3(-.1,1.5,.2),[.04,.06,.04],'Vesica biliaris');
-ell('Qalxanabənzər vəzi (Glandula thyroidea)',KH,0xb5543f,V3(0,2.6,.12),[.09,.04,.04],'Glandula thyroidea');
+ell('Qalxanabənzər vəz (Glandula thyroidea)',KH,0xb5543f,V3(0,2.6,.12),[.09,.04,.04],'Glandula thyroidea');
 ell('Beyincik (Cerebellum)',KH,0xc98090,V3(0,3.02,-.2),[.16,.1,.12],'Cerebellum');
 ell('Diafraqma (Diaphragma)',BR,0xc77a5a,V3(0,1.78,0),[.38,.03,.28],'Diaphragma').userData.mo=.55;
 put(new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.85,12),mat(0xd48a8a)),'Qida borusu (Oesophagus)',BR,V3(0,2.12,.02),'Oesophagus');
-put(new THREE.Mesh(new THREE.CylinderGeometry(.028,.024,1.2,12),mat(0xb22222)),'Aorta (Hauptschlagader)',BR,V3(.04,1.55,-.03),'Aorta');
+put(new THREE.Mesh(new THREE.CylinderGeometry(.028,.024,1.2,12),mat(0xb22222)),'Aorta',BR,V3(.04,1.55,-.03),'Aorta');
 
-// Bölgələr və İdarəetmə
+// Gefäße, Nerven, Muskeln, Details
+function tube(name,reg,col,pts,r,sub){const cr=new THREE.CatmullRomCurve3(pts.map(p=>V3(...p)));const g=new THREE.TubeGeometry(cr,48,r,6);g.computeBoundingBox();const c=g.boundingBox.getCenter(V3());g.translate(-c.x,-c.y,-c.z);return put(new THREE.Mesh(g,mat(col)),name,reg,c,sub)}
+const RT=0xd42a2a,BL=0x2b5fd9,YL=0xe6c84a;
+[-1,1].forEach(s=>{
+ tube('Yuxu arteriyası (A. carotis)',KH,RT,[[s*.03,2.2,.05],[s*.1,2.7,.1],[s*.14,3.0,.2],[s*.1,3.3,.2]],.018,'Arteria carotis');
+ tube('Bazu arteriyası (A. brachialis)',GL,RT,[[s*.05,2.2,.05],[s*.4,2.45,.05],[s*.58,2.1,.06],[s*.65,1.5,.07],[s*.72,1.05,.1]],.016,'Arteria brachialis');
+ tube('Bud arteriyası (A. femoralis)',GL,RT,[[s*.03,1.0,0],[s*.12,.85,.06],[s*.24,.4,.08],[s*.28,-.2,.06],[s*.3,-1.2,.04]],.022,'Arteria femoralis');
+ tube('Drossel venası (V. jugularis)',KH,BL,[[s*.09,2.2,.02],[s*.16,2.75,.05],[s*.2,3.05,.1]],.02,'Vena jugularis');
+ tube('Qol venası (V. basilica)',GL,BL,[[s*.45,2.4,0],[s*.62,2.0,.04],[s*.7,1.4,.08],[s*.74,1.05,.1]],.014,'Vena basilica');
+ tube('Bud venası (V. femoralis)',GL,BL,[[s*.05,1.0,0],[s*.2,.8,.05],[s*.3,.3,.05],[s*.34,-.2,.04],[s*.33,-1.2,.03]],.024,'Vena femoralis');
+ tube('Qol sinir kələfi (Plexus brachialis)',GL,YL,[[s*.04,2.55,-.15],[s*.45,2.35,-.05],[s*.6,1.8,-.03],[s*.7,1.1,.08]],.01,'Plexus brachialis');
+ tube('Oturacaq siniri (N. ischiadicus)',GL,YL,[[s*.1,1.0,-.15],[s*.2,.7,-.1],[s*.3,.1,-.06],[s*.3,-1.2,-.03]],.012,'Nervus ischiadicus');
+ tube('Vaqus siniri (N. vagus)',KH,YL,[[s*.08,3.0,0],[s*.1,2.5,.05],[s*.06,2.0,.1],[s*.05,1.6,.1]],.008,'Nervus vagus');
+ ell('Göz alması (Bulbus oculi)',KH,0xf2f2f2,V3(s*.13,3.22,.37),[.055,.055,.055],'Bulbus oculi');
+ for(let f=0;f<5;f++){const xf=s*(.66+.02*f),tip=[.8,.74,.72,.75,.8][f];bone('Barmaq sümükləri (Phalanges)',GL,V3(xf,1.04,.1),V3(xf+s*(f-2)*.012,tip,.1),.011,'Phalanges')}
+ MU.forEach(m=>ell(m[0],m[2],0xb5444a,V3(s*m[3],m[4],m[5]),[m[6],m[7],m[8]],m[1]).userData.mo=.6)});
+tube('Aşağı boş vena (V. cava)',BR,BL,[[-.05,.95,0],[-.06,1.6,0],[-.06,2.1,.05],[-.02,2.3,.08]],.03,'Vena cava');
+tube('Onurğa beyni (Medulla spinalis)',BR,YL,[2.9,2.0,1.4,1.0].map(y=>[0,y,-.2+.07*Math.sin((y-1)*1.7)]),.018,'Medulla spinalis');
+for(let i=-5;i<=5;i++)[2.96,2.9].forEach((y,k)=>ell('Diş (Dens)',KH,0xf4f1e6,V3(i*.027,y,.31-i*i*.003+(k?.02:0)),[.012,.018,.01],'Dentes'));
+(function(){let sd=7;const rn=()=>(sd=(sd*16807)%2147483647)/2147483647;const g=new THREE.Group(),m=mat(RT);
+for(let i=0;i<46;i++){const a=rn()*6.28,b=.3+rn()*1.9,pts=[];for(let j=0;j<6;j++){const bb=b+j*.18*(rn()-.2),aa=a+j*.35*(rn()-.5);pts.push(V3(.29*Math.sin(bb)*Math.cos(aa),.32*Math.cos(bb),.32*Math.sin(bb)*Math.sin(aa)))}
+g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),20,.004,4),m))}
+put(g,'Beyin damarları (Arteriae cerebri)',KH,V3(0,3.22,0),'Arteriae cerebri')})();
+
+// Regionen / Ansichten
 const C0=V3(0,1.6,0),FOC={all:1.3,[KH]:3.0,[BR]:2.1,[BB]:1.1,[GL]:1.3};
 let region=null,sel=null;const fT=V3(0,1.3,0),fC=V3(0,1.3,0);
 const rbox=document.getElementById('regions');
 [KH,BR,BB,GL].forEach(r=>{const b=document.createElement('button');b.className='reg';b.textContent=r;b.onclick=()=>{region=region===r?null:r;follow=false;fT.set(0,FOC[region||'all'],0);dist.t=region?4.6:7.6;document.querySelectorAll('.reg').forEach(x=>x.classList.toggle('on',x.textContent===region))};rbox.append(b)});
-let showB=true,showO=true;
+const show={b:1,o:1,v:1,n:1,m:0};
 function mk(t,f,c){const b=document.createElement('button');b.className='reg '+(c||'');b.textContent=t;b.onclick=()=>f(b);rbox.append(b)}
 mk('Bütün Bədən',()=>{region=null;follow=false;fT.set(0,1.3,0);dist.t=7.6;if(sel)setEm(sel,0);sel=null;lab.style.display='none';document.querySelectorAll('.reg').forEach(x=>x.classList.remove('on'))});
-mk('Skelet Aç/Bağla',b=>{showB=!showB;b.classList.toggle('on',!showB)});
-mk('Orqanlar Aç/Bağla',b=>{showO=!showO;b.classList.toggle('on',!showO)});
-mk('☰ Orqanlar',()=>side.classList.toggle('open'),'tgm');
+[['Skelet','b'],['Orqanlar','o'],['Damarlar','v'],['Sinirlər','n'],['Əzələlər','m']].forEach(([t,k])=>{const b=document.createElement('button');b.className='lay'+(show[k]?' on':'');b.textContent=t;b.onclick=()=>{show[k]=show[k]?0:1;b.classList.toggle('on',!!show[k])};rbox.append(b)});
 
+mk('☰ Orqanlar',()=>side.classList.toggle('open'),'tgm');
 const VIEWS={Ön:[0,Math.PI/2],Arxa:[Math.PI,Math.PI/2],Yan:[Math.PI/2,Math.PI/2],Perspektiv:[.7,1.25]};
 const vb=document.getElementById('views');
 Object.keys(VIEWS).forEach((k,i)=>{const b=document.createElement('button');b.className='v'+(i==3?' on':'');b.textContent=k;b.onclick=()=>{th.t=VIEWS[k][0];ph.t=VIEWS[k][1];[...vb.children].forEach(x=>x.classList.toggle('on',x===b))};vb.append(b)});
@@ -151,7 +174,7 @@ cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,
 cv.addEventListener('pointerup',e=>{drag=null;if(moved<6)pick(e)});
 cv.addEventListener('wheel',e=>{e.preventDefault();dist.t=Math.min(12,Math.max(2,dist.t+e.deltaY*.005))},{passive:false});
 
-// Məlumat Bazası (Azərbaycan Dilində)
+// Auswahl
 const ray=new THREE.Raycaster(),lab=document.getElementById('label');
 function setEm(o,v){o.traverse(m=>{if(m.material)m.material.emissive=new THREE.Color(v)})}
 function pick(e){
@@ -163,53 +186,79 @@ function pick(e){
 const side=document.getElementById('side');let follow=false;
 const ORG=new Set(['Cerebrum','Cerebellum','Trachea','Pulmo','Ren','Cor','Hepar','Gaster','Intestinum tenue','Colon','Vesica urinaria','Splen','Pancreas','Vesica biliaris','Oesophagus','Glandula thyroidea','Diaphragma','Aorta']);
 const INFO={
-'Os craniale':['Kəllə sümüyü','Beyni qoruyan sümük qutu; 8 sümükdən ibarətdir və yetkində tikişlərlə bitişib.'],
-'Mandibula':['Alt çənə','Üz skeletinin yeganə hərəkətli sümüyü; çeynəmə və danışıqda iştirak edir.'],
-'Cerebrum':['Baş beyin','Düşüncə, yaddaş, hissiyyat və iradi hərəkətlərin mərkəzi; təxminən 86 milyard neyron var.'],
-'Cerebellum':['Beyincik','Hərəkətlərin əlaqələndirilməsi, tarazlıq və duruşu idarə edir.'],
-'Trachea':['Traxeya (Nəfəs borusu)','Havanı qırtlaqdan ağciyərlərə aparan ~12 sm uzunluqlu, qığırdaq halqalı boru.'],
-'Glandula thyroidea':['Qalxanabənzər vəzi','Boyunda yerləşir; maddələr mübadiləsini tənzimləyən hormonlar ifraz edir.'],
-'Vertebra':['Fəqərələr','Onurğa sütununu əmələ gətirən sümüklər; onurğa beynini qoruyur. 7 boyun, 12 döş, 5 bel fəqərəsi var.'],
-'Os sacrum':['Oma sümüyü','5 fəqərənin birləşməsindən yaranıb; çanağın arxa divarını təşkil edir.'],
-'Costae':['Qabırğalar','12 cüt; ürək və ağciyərləri qoruyur, nəfəs alarkən döş qəfəsini genişləndirir.'],
-'Sternum':['Döş sümüyü','Döş qəfəsinin ön ortasında yastı sümük; qabırğalar ona qığırdaqla birləşir.'],
-'Clavicula':['Körpücük sümüyü','Qolu gövdəyə bağlayan S-şəkilli sümük; çiyni yerində saxlayır.'],
-'Scapula':['Kürək sümüyü','Üçbucaqlı yastı sümük; çiyin oynağını əmələ gətirir və qol əzələlərinə bərkidilmə yeri verir.'],
-'Humerus':['Bazu sümüyü','Qolun ən uzun sümüyü; çiyindən dirsəyə qədər uzanır.'],
-'Radius':['Şüa sümüyü','Dirsəkdən biləyə qədər baş barmaq tərəfindəki ön qol sümüyü.'],
-'Manus':['Əl sümükləri','27 sümükdən ibarətdir; incə və güclü tutma hərəkətlərini təmin edir.'],
-'Os ilium':['Qalça (Çanaq) sümüyü','Çanağın geniş yan hissəsi; bədən çəkisini ayaqlara ötürür və daxili orqanları dəstəkləyir.'],
-'Femur':['Bud sümüyü','Bədənin ən uzun və ən güclü sümüyü.'],
-'Patella':['Diz qapağı','Diz oynağını qoruyan kiçik sümük; bud əzələsinin qüvvəsini artırır.'],
-'Tibia':['Qamış sümüyü','Baldırın əsas daşıyıcı sümüyü; bədən çəkisinin böyük hissəsini daşıyır.'],
-'Pes':['Ayaq sümükləri','26 sümükdən ibarətdir; tarazlıq, yeriş və qaçışı təmin edir.'],
-'Pulmo':['Ağciyər','Qaz mübadiləsi orqanı: oksigen qana keçir, karbon qazı xaric olunur. ~300 milyon alveol var.'],
-'Diaphragma':['Diafraqma','Döş və qarın boşluqlarını ayıran əsas tənəffüs əzələsi.'],
-'Cor':['Ürək','Qanı bütün bədənə vuran əzələ nasosu; gündə təxminən 100 000 dəfə döyünür.'],
-'Aorta':['Aorta','Bədənin ən böyük arteriyası; oksigenli qanı ürəkdən orqanlara paylayır.'],
-'Oesophagus':['Qida borusu','Qidanı udlaqdan mədəyə daşıyan ~25 sm əzələ borusu.'],
-'Hepar':['Qaraciyər','Ən böyük daxili orqan: öd istehsal edir, zəhərləri təmizləyir, qlükozanı saxlayır.'],
-'Vesica biliaris':['Öd kisəsi','Qaraciyərin istehsal etdiyi ödü toplayır və yağların həzmi üçün bağırsağa buraxır.'],
-'Gaster':['Mədə','Qidanı mədə şirəsi və turşu ilə parçalayan əzələli kisə.'],
-'Pancreas':['Mədəaltı vəzi','Həzm fermentləri və qan şəkərini tənzimləyən insulin istehsal edir.'],
-'Splen':['Dalaq','Qanı süzür, köhnə qırmızı qan hüceyrələrini məhv edir, immunitetdə iştirak edir.'],
-'Ren':['Böyrək','Qanı süzür, sidik əmələ gətirir, su-duz tarazlığını və qan təzyiqini tənzimləyir.'],
-'Intestinum tenue':['Nazik bağırsaq','~6 metr uzunluğunda; qida maddələrinin əsas hissəsi burada qana sorulur.'],
-'Colon':['Yoğun bağırsaq','Suyu sorur və qalıqlardan nəcis formalaşdırır.'],
-'Vesica urinaria':['Sidik kisəsi','Sidiyi toplayıb saxlayır; tutumu təxminən 400-500 ml-dir.']};
-
+'Arteria carotis':['Yuxu arteriyası','Boyundan keçərək beyni və baş nahiyəsini oksigenli qanla təmin edir.'],
+'Arteria brachialis':['Bazu arteriyası','Çiyindən dirsəyə qədər qola oksigenli qan daşıyan əsas damar.'],
+'Arteria femoralis':['Bud arteriyası','Ayağı qidalandıran əsas və böyük arteriya damarı.'],
+'Vena jugularis':['Drossel venası','Baş və beyindən qanı ürəyə qaytaran əsas vena damarı.'],
+'Vena basilica':['Qol venası','Yuxarı ətrafın səthi qan damarlarından biri.'],
+'Vena femoralis':['Bud venası','Ayaqdan qanı geri - ürəyə daşıyan əsas damar.'],
+'Vena cava':['Aşağı boş vena','Bədənin aşağı hissəsinin qanını ürəyə toplayan əsas damar.'],
+'Plexus brachialis':['Qol sinir kələfi','Boyun və döş nahiyəsindən çıxaraq qola yayılan sinirlər dəstəsi.'],
+'Nervus ischiadicus':['Oturacaq siniri','Bədənin ən uzun və qalın siniri; aşağı ətrafın hərəkətini idarə edir.'],
+'Nervus vagus':['Vaqus siniri (sərgəzən sinir)','Daxili orqanların (ürək, mədə, ağciyər) işini tənzimləyən əsas beyin siniri.'],
+'Medulla spinalis':['Onurğa beyni','Beyinlə bədən arasında siqnalları daşıyan mərkəzi sinir sistemi hissəsi.'],
+'Arteriae cerebri':['Beyin damarları şəbəkəsi','Beyin toxumasını qidalandıran incə arteriyalar.'],
+'Bulbus oculi':['Göz alması',' görmə funksiyasını yerinə yetirən əsas orqan.'],
+'Dentes':['Dişlər','Qidaların mexaniki olaraq xırdalanmasını təmin edir.'],
+'Phalanges':['Barmaq sümükləri','Əl və ayaq barmaqlarını təşkil edən kiçik sümüklər.'],
+'Musculus pectoralis':['Döş əzələsi','Qolu gövdəyə yaxınlaşdırır və irəli hərəkət etdirir.'],
+'Musculus deltoideus':['Çiyin əzələsi','Qolu yana qaldırmağa kömək edir.'],
+'Musculus biceps':['Pazı əzələsi (biseps)','Dirsəkdən qolu bükən əsas əzələ.'],
+'Musculi antebrachii':['Ön qol əzələləri','Bilək və barmaq hərəkətlərini idarə edir.'],
+'Musculus rectus abdominis':['Düz qarın əzələsi','Gövdəni önə əyməyə və daxili orqanları qorumağa xidmət edir.'],
+'Musculus quadriceps':['Dördbaşlı bud əzələsi','Diz oynağını açan və yerişi təmin edən güclü əzələ.'],
+'Musculus gastrocnemius':['Baldır əzələsi','Ayaqucu qalxmağa və yerişə kömək edir.'],
+'Musculus gluteus':['Omba əzələsi','Bədənin dik durmasını və budun arxaya hərəkətini təmin edir.'],
+'Musculus trapezius':['Trapesiya əzələsi','Çiyinləri yuxarı qaldırır və kürəyi saxlayır.'],
+'Musculus latissimus':['Geniş kürək əzələsi','Qolu aşağı və arxaya çəkir.'],
+'Musculus sternocleidomastoideus':['Döş-körpücük-məməvari əzələ','Başı yana döndərir və əyir.'],
+'Musculus masseter':['Çeynəmə əzələsi','Alt çənəni hərəkət etdirir.'],
+'Os craniale':['Kəllə sümüyü','Beyni xarici təsirlərdən qoruyan sümük qutu.'],
+'Mandibula':['Alt çənə sümüyü','Üz hissəsinin yeganə hərəkətli sümüyü.'],
+'Cerebrum':['Baş beyin','Təfəkkür, yaddaş və şüurlu fəaliyyət mərkəzi.'],
+'Cerebellum':['Beyincik','Tarazlıq və hərəkət koordinasiyasına cavabdehdir.'],
+'Trachea':['Traxeya (nəfəs borusu)','Havanı ağciyərlərə ötürən qığırdaq halqalı boru.'],
+'Glandula thyroidea':['Qalxanabənzər vəz','Maddələr mübadiləsini tənzimləyən hormonlar istehsal edir.'],
+'Vertebra':['Fəqərələr','Onurğa sütununu təşkil edən ayrı-ayrı sümüklər.'],
+'Os sacrum':['Oma sümüyü','Çanaq qurşağını birləşdirən üçbucaqlı sümük.'],
+'Costae':['Qabırğalar','Döş qəfəsini əmələ gətirən və daxili orqanları qoruyan qövslər.'],
+'Sternum':['Döş sümüyü','Döş qəfəsinin ön hissəsində yerləşən yastı sümük.'],
+'Clavicula':['Körpücük sümüyü','Çiyin qurşağını döş qəfəsinə birləşdirən sümük.'],
+'Scapula':['Kürək sümüyü','Çiyin oynağının hərəkətində iştirak edən yastı sümük.'],
+'Humerus':['Bazu sümüyü','Çiyinlə dirsək arasındakı uzun sümük.'],
+'Radius':['Şüa sümüyü','Ön qolun bayır tərəfindəki sümük.'],
+'Manus':['Əl sümükləri','Əl darağı və barmaq sümükləri kompleksi.'],
+'Os ilium':['Qalça sümüyü','Çanaq sümüklərinin ən böyük hissəsi.'],
+'Femur':['Bud sümüyü','İnsan bədəninin ən uzun və güclü sümüyü.'],
+'Patella':['Diz qapağı','Diz oynağını qoruyan kiçik sümük.'],
+'Tibia':['Qamış sümüyü','Baldırın əsas yük daşıyan sümüyü.'],
+'Pes':['Ayaq sümükləri','Ayaq darağı və barmaq sümükləri.'],
+'Pulmo':['Ağciyər','Tənəffüs və qaz mübadiləsi orqanı.'],
+'Diaphragma':['Diafraqma','Döş və qarın boşluğunu ayıran əsas tənəffüs əzələsi.'],
+'Cor':['Ürək','Qanı bütün bədənə pompalamaqla məşğul olan əzələli orqan.'],
+'Aorta':['Aorta arteriyası','Ürəkdən çıxan ən böyük və əsas qan damarı.'],
+'Oesophagus':['Qida borusu','Qidanı udlaqdan mədəyə ötürən boru.'],
+'Hepar':['Qaraciyər','Orqanizmin əsas filtr və maddələr mübadiləsi mərkəzi.'],
+'Vesica biliaris':['Öd kisəsi','Ödü toplayıb həzmə kömək edən kiçik orqan.'],
+'Gaster':['Mədə','Qidaların şirə ilə qarışaraq həzm olunmağa başladığı yer.'],
+'Pancreas':['Mədəaltı vəz','Həzm fermentləri və insulin istehsal edən vəz.'],
+'Splen':['Dalaq','İmmunitetdə və qan hüceyrələrinin təmizlənməsində rol oynayan orqan.'],
+'Ren':['Böyrək','Qanı süzərək sidik əmələ gətirən əsas ifrazat orqanı.'],
+'Intestinum tenue':['Nazik bağırsaq','Qidaların qana sorulduğu uzun qıvrım bağırsaq hissəsi.'],
+'Colon':['Yoğun bağırsaq','Suyun sorulduğu və nəcisin yarandığı bağırsaq hissəsi.'],
+'Vesica urinaria':['Sidik kisəsi','Sidiyin toplanıb xaric olunduqdan əvvəl saxlandığı orqan.']};
+const KD={};ORG.forEach(k=>KD[k]='o');Object.keys(INFO).forEach(k=>{if(/^Muscul/.test(k))KD[k]='m';else if(/^(Arteri|Vena)/.test(k))KD[k]='v';else if(/^(Nerv|Plexus|Medulla)/.test(k))KD[k]='n'});
 function select(o,fly){
   if(sel)setEm(sel,0);sel=o;setEm(o,0x2a3f99);
   const i=INFO[o.userData.sub]||[o.userData.name,''];
   lab.innerHTML='<b>'+i[0]+'</b><small>'+o.userData.name+' · '+o.userData.region+'</small>'+i[1];lab.style.display='block';
   document.querySelectorAll('.it').forEach(x=>x.classList.toggle('on',x.dataset.k===o.userData.sub));
   if(fly){follow=true;fT.copy(o.position);const s=new THREE.Box3().setFromObject(o).getSize(V3()).length();dist.t=Math.min(7,Math.max(1.5,s*3.2));side.classList.remove('open')}}
-
 const list=document.getElementById('list'),q=document.getElementById('q');
 function build(f){list.innerHTML='';Object.keys(INFO).forEach(k=>{const p=parts.find(x=>x.userData.sub===k);if(!p||(f&&!(INFO[k][0]+k).toLowerCase().includes(f)))return;const d=document.createElement('div');d.className='it';d.dataset.k=k;d.innerHTML=INFO[k][0]+'<small>'+k+' · '+p.userData.region+'</small>';d.onclick=()=>{region=null;document.querySelectorAll('.reg').forEach(x=>x.classList.remove('on'));select(p,true)};list.append(d)})}
 q.oninput=()=>build(q.value.toLowerCase());build('');
 
-// Dağıtma (Explosion)
+// Explosion
 const ex=document.getElementById('ex');let eT=0,eC=0;
 ex.oninput=()=>eT=ex.value/100;
 document.getElementById('reset').onclick=()=>{eT=0;ex.value=0};
@@ -220,12 +269,12 @@ function loop(){
   parts.forEach(o=>{
     const b=o.userData.base,d=b.clone().sub(C0);
     o.position.copy(b).addScaledVector(d,eC*1.1);
-    const u=o.userData,on=!region||u.region===region,vis=ORG.has(u.sub)?showO:showB;u.vis=vis;const op=on?(u.mo||1):.1;
+    const u=o.userData,on=!region||u.region===region,vis=show[KD[u.sub]||'b'];u.vis=vis;const op=on?(u.mo||1):.1;
     o.traverse(m=>{if(m.material){m.material.opacity+=(op-m.material.opacity)*.15}});o.visible=vis});
   const t=performance.now()/1000,k=1+.09*Math.pow(Math.max(0,Math.sin(t*7)),3),br=Math.sin(t*1.6);
   heart.scale.set(.12*k,.15*k,.11*k);lungs.forEach(l=>l.scale.set(.17*(1+.04*br),.32*(1+.07*br),.16*(1+.05*br)));
   cam.position.set(fC.x+dist.c*Math.sin(ph.c)*Math.sin(th.c),fC.y+dist.c*Math.cos(ph.c),fC.z+dist.c*Math.sin(ph.c)*Math.cos(th.c));
-  cam.lookAt(fC);renderer.render(scene,camera||cam)}
+  cam.lookAt(fC);renderer.render(scene,cam)}
 loop();
 </script>
 </body>
