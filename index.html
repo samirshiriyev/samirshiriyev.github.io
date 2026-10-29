@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azərbaycan 3D İnteraktiv Xəritəsi | Samir Şiriyev</title>
+    <title>İnsan Anatomiyası | 3D İnteraktiv Atlas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Three.js (3D Renderinq Kitabxanası) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <style>
         * {
@@ -15,192 +16,24 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
         }
 
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0f172a;
-            color: #fff;
+            background: #020617;
+            color: #f8fafc;
         }
 
-        /* Header Control Panel */
-        .map-header {
+        /* Yuxarı Başlıq və İdarəetmə Panelini */
+        .app-header {
             position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px 25px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-        }
-
-        .map-header h1 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #38bdf8;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-reset {
-            background: #0284c7;
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-reset:hover {
-            background: #0ea5e9;
-        }
-
-        /* Map Container */
-        #map {
-            width: 100%;
-            height: 100vh;
-            z-index: 1;
-        }
-
-        /* 3D Visual Effects for Map Tiles */
-        .leaflet-tile-container {
-            filter: contrast(105%) brightness(95%);
-        }
-
-        /* Custom Popup Style */
-        .leaflet-popup-content-wrapper {
-            background: rgba(30, 41, 59, 0.95);
-            color: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            backdrop-filter: blur(8px);
-        }
-
-        .leaflet-popup-tip {
-            background: rgba(30, 41, 59, 0.95);
-        }
-
-        .popup-title {
-            font-weight: bold;
-            font-size: 15px;
-            color: #38bdf8;
-            margin-bottom: 4px;
-        }
-
-        .popup-desc {
-            font-size: 12px;
-            color: #cbd5e1;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .map-header {
-                width: 90%;
-                justify-content: space-between;
-                font-size: 12px;
-            }
-            .map-header h1 {
-                font-size: 13px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="map-header">
-        <h1><i class="fas fa-map-marked-alt"></i> Azərbaycan Canlı 3D Xəritəsi</h1>
-        <button class="btn-reset" onclick="resetMapView()">
-            <i class="fas fa-crosshairs"></i> Mərkəzə Qayıt
-        </button>
-    </div>
-
-    <div id="map"></div>
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script>
-        // Azərbaycanın mərkəz koordinatları və sərhədləri
-        const azebaijanCenter = [40.1431, 47.5769];
-        const initialZoom = 7.5;
-
-        // Xəritəni yaradırıq (yaxınlaşdırma və fırlatma xüsusiyyətləri ilə)
-        const map = L.map('map', {
-            center: azebaijanCenter,
-            zoom: initialZoom,
-            minZoom: 6,
-            maxZoom: 18,
-            zoomControl: false
-        });
-
-        // Sol tərəfə Zoom idarəetməsini əlavə edirik
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-        // Peyk və 3D relies teksturu (Esri World Imagery)
-        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        });
-
-        // Şəhər və yol adları overlay-ı
-        const labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            maxZoom: 19
-        });
-
-        // Təbəqələri xəritəyə daxil edirik
-        satelliteLayer.addTo(map);
-        labelsLayer.addTo(map);
-
-        // Mühüm Şəhərlər və İşarələr (Markers)
-        const locations = [
-            { name: "Bakı", coords: [40.4093, 49.8671], desc: "Azərbaycan Respublikasının Paytaxtı" },
-            { name: "Gəncə", coords: [40.6828, 46.3606], desc: "Nizami Yurdu, Qədim Mədəniyyət Mərkəzi" },
-            { name: "Şuşa", coords: [39.7537, 46.7465], desc: "Azərbaycanın Mədəniyyət Paytaxtı" },
-            { name: "Masallı", coords: [39.0341, 48.6589], desc: "Cənub Mirvarisi, Şərəfə / Təklə / Ərkivan" },
-            { name: "Naxçıvan", coords: [39.2089, 45.4122], desc: "Naxçıvan Muxtar Respublikası" },
-            { name: "Xankəndi", coords: [39.8264, 46.7561], desc: "Qarabağ İqtisadi Rayonu" },
-            { name: "Şəki", coords: [41.1919, 47.1706], desc: "Tarixi Xan Sarayı və Şəki Qalası" },
-            { name: "Lənkəran", coords: [38.7529, 48.8521], desc: "Cənub Bölgəsinin Mərkəzi" }
-        ];
-
-        // Şəhər markerlərini xəritəyə düzürük
-        locations.forEach(loc => {
-            const marker = L.circleMarker(loc.coords, {
-                radius: 8,
-                fillColor: "#38bdf8",
-                color: "#ffffff",
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.9
-            }).addTo(map);
-
-            marker.bindPopup(`
-                <div class="popup-title">${loc.name}</div>
-                <div class="popup-desc">${loc.desc}</div>
-            `);
-        });
-
-        // Xəritəni sıfırlama funksiyası
-        function resetMapView() {
-            map.flyTo(azebaijanCenter, initialZoom, {
-                duration: 1.5
-            });
-        }
-    </script>
-</body>
-</html>
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding:
