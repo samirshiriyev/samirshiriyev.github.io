@@ -1,324 +1,232 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İnsan Anatomiyası | 3D İnteraktiv Atlas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Three.js & GLTFLoader & OrbitControls -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-        }
-
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #0b0f19;
-            color: #f8fafc;
-        }
-
-        /* Yuxarı Panel */
-        .app-header {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-
-        .app-header h1 {
-            font-size: 18px;
-            color: #38bdf8;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .app-header p {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-        /* Menyu */
-        .system-menu {
-            position: absolute;
-            top: 110px;
-            left: 20px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .system-btn {
-            background: rgba(30, 41, 59, 0.85);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #f1f5f9;
-            padding: 12px 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .system-btn:hover, .system-btn.active {
-            background: #0284c7;
-            color: #fff;
-            border-color: #38bdf8;
-            transform: translateX(5px);
-            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.4);
-        }
-
-        /* Məlumat Kartı */
-        .info-card {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            width: 320px;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-
-        .info-card h2 {
-            font-size: 16px;
-            color: #38bdf8;
-            margin-bottom: 8px;
-        }
-
-        .info-card p {
-            font-size: 13px;
-            color: #cbd5e1;
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
-
-        .info-card .tag {
-            display: inline-block;
-            background: rgba(56, 189, 248, 0.2);
-            color: #38bdf8;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* Yüklənmə Ekranı */
-        #loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 200;
-            text-align: center;
-            color: #38bdf8;
-            font-size: 16px;
-            font-weight: 600;
-            background: rgba(15, 23, 42, 0.9);
-            padding: 20px 40px;
-            border-radius: 16px;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100vh;
-        }
-
-        .controls-hint {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(8px);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #94a3b8;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            gap: 15px;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>İnsan Anatomiyası | 3D İnteraktiv Atlas</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d12;--panel:rgba(30,33,42,.82);--line:rgba(255,255,255,.1);--txt:#e9ecf3;--mut:#8b92a5;--acc:#5b7cff}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+header{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;padding:14px 18px;font-size:14px;font-weight:600;pointer-events:none;z-index:2}
+header small{display:block;color:var(--mut);font-weight:400;font-size:12px;margin-top:2px}
+#regions{position:fixed;right:14px;top:calc(env(safe-area-inset-top,0px) + 64px);width:210px;display:flex;flex-direction:column;gap:8px;z-index:2}
+#regions h3{margin:0 0 2px;font-size:12px;color:var(--mut);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.reg{background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:14px;padding:14px;font-size:14px;text-align:left;cursor:pointer;backdrop-filter:blur(10px)}
+.reg.on{border-color:var(--acc);background:rgba(91,124,255,.22)}
+#ctrl{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(560px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 14px;z-index:2;backdrop-filter:blur(10px)}
+#views{display:flex;gap:6px;margin-bottom:10px}
+.v{flex:1;background:transparent;border:1px solid var(--line);color:var(--mut);padding:8px 4px;border-radius:10px;font-size:13px;cursor:pointer}
+.v.on{background:rgba(255,255,255,.14);color:var(--txt)}
+.row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut)}
+.row span{white-space:nowrap}
+#reset{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:8px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+input[type=range]{flex:1;min-width:0;accent-color:var(--acc);height:28px}
+#label{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 128px);width:min(560px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.5;display:none;z-index:3;backdrop-filter:blur(10px)}
+#label b{font-size:16px}
+#label small{display:block;color:var(--mut);font-size:11px;margin:2px 0 6px}
+#side{position:fixed;left:14px;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:150px;width:230px;display:flex;flex-direction:column;gap:8px;z-index:2;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;backdrop-filter:blur(10px)}
+#q{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--txt);font-size:13px}
+#list{overflow:auto;flex:1}
+.it{padding:8px 6px;border-radius:8px;font-size:13px;cursor:pointer}.it small{display:block;color:var(--mut);font-size:11px}.it:hover,.it.on{background:rgba(91,124,255,.22)}
+.tgm{display:none}
+@media(max-width:700px){
+#regions{left:12px;right:12px;width:auto;flex-direction:row;overflow-x:auto;top:calc(env(safe-area-inset-top,0px) + 56px)}
+#regions h3{display:none}.reg{white-space:nowrap;padding:10px 12px;font-size:13px}
+#side{display:none;left:12px;right:12px;width:auto;top:calc(env(safe-area-inset-top,0px) + 108px)}#side.open{display:flex}.tgm{display:block}
+}
+</style>
 </head>
 <body>
+<header>İnsan Anatomiyası | 3D İnteraktiv Atlas<small>Sürüşdür = fırlat · Çarx (scroll) = yaxınlaşdır · Kliklə = orqanı seç</small></header>
+<div id="side"><input id="q" placeholder="Orqan axtar…"><div id="list"></div></div><div id="label"></div>
+<div id="regions"><h3>Bölgələr</h3></div>
+<div id="ctrl">
+<div id="views"></div>
+<div class="row"><span>Hissələri aralamaq (Dağıtmaq)</span><input id="ex" type="range" min="0" max="100" value="0"><button id="reset">Yenidən birləşdir</button></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0b0d12);
+scene.fog=new THREE.Fog(0x0b0d12,9,16);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.body.prepend(renderer.domElement);
+const cam=new THREE.PerspectiveCamera(40,1,.1,50);
+scene.add(new THREE.HemisphereLight(0xdfe8ff,0x20242e,.9));
+const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,5,6);scene.add(dl);
+const dl2=new THREE.DirectionalLight(0x8899ff,.4);dl2.position.set(-4,2,-5);scene.add(dl2);
 
-    <div id="loader"><i class="fas fa-spinner fa-spin"></i> 3D Anatomiya Modeli Yüklənir...</div>
+const parts=[],V3=(x,y,z)=>new THREE.Vector3(x,y,z),BONE=0xe9dfc4;
+const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.55,metalness:.04,transparent:true,opacity:1});
+function put(o,name,region,pos,sub){o.position.copy(pos);o.userData={name,region,sub:sub||'',base:pos.clone()};scene.add(o);parts.push(o);return o}
+function ell(name,region,c,pos,sc,sub){const m=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),mat(c));m.scale.set(...sc);return put(m,name,region,pos,sub)}
+function bone(name,region,a,b,r,sub){
+  const d=b.clone().sub(a),L=d.length(),g=new THREE.Group();
+  const q=new THREE.Quaternion().setFromUnitVectors(V3(0,1,0),d.clone().normalize());
+  const cyl=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.1,L,14),mat(BONE));cyl.quaternion.copy(q);g.add(cyl);
+  [-.5,.5].forEach(s=>{const k=new THREE.Mesh(new THREE.SphereGeometry(r*1.7,14,12),mat(BONE));k.position.copy(d.clone().multiplyScalar(s));g.add(k)});
+  return put(g,name,region,a.clone().add(b).multiplyScalar(.5),sub)}
 
-    <div class="app-header">
-        <h1><i class="fas fa-heartbeat"></i> 3D Anatomiya Atlası</h1>
-        <p>Real Orqanlar və Bədən Quruluşunu 3D araşdırın</p>
-    </div>
+const KH='Baş və Boyun',BR='Döş Qəfəsi',BB='Qarın və Çanaq',GL='Ətraflar (Qol/Ayaq)';
+const lungs=[];
+// Baş və Boyun
+ell('Kəllə sümüyü (Cranium)',KH,BONE,V3(0,3.2,0),[.34,.38,.38],'Os craniale');
+ell('Alt çənə (Mandibula)',KH,BONE,V3(0,2.92,.14),[.22,.1,.2],'Mandibula');
+ell('Baş beyin (Cerebrum)',KH,0xe3a0b0,V3(0,3.22,0),[.27,.3,.3],'Cerebrum');
+const tr=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.55,12),mat(0xbfd3e6));put(tr,'Traxeya (Nəfəs borusu)',KH,V3(0,2.45,.1),'Trachea');
 
-    <div class="system-menu">
-        <button class="system-btn active" id="btn-brain">
-            <i class="fas fa-brain"></i> Beyin
-        </button>
-        <button class="system-btn" id="btn-heart">
-            <i class="fas fa-heart"></i> Ürək & Döş Qəfəsi
-        </button>
-        <button class="system-btn" id="btn-organs">
-            <i class="fas fa-lungs"></i> Daxili Orqanlar
-        </button>
-        <button class="system-btn" id="btn-skeleton">
-            <i class="fas fa-bone"></i> Sümük Karkası
-        </button>
-        <button class="system-btn" id="btn-reset">
-            <i class="fas fa-compress-arrows-alt"></i> Ümumi Görünüş
-        </button>
-    </div>
+// Onurğa Sütunu
+for(let i=0;i<24;i++){
+  const yy=i<7?2.82-i*.055:i<19?2.42-(i-7)*.078:1.46-(i-19)*.09;
+  const z=-.1+.07*Math.sin((yy-1)*1.7);
+  const reg=i<7?KH:i<19?BR:BB;
+  const n=i<7?'Boyun fəqərəsi C'+(i+1):i<19?'Döş fəqərəsi Th'+(i-6):'Bel fəqərəsi L'+(i-18);
+  const w=i<7?.05:i<19?.06:.075;
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(w,w*1.05,.055,14),mat(BONE));
+  put(m,n,reg,V3(0,yy,z),'Vertebra')}
+const sac=new THREE.Mesh(new THREE.ConeGeometry(.12,.3,12),mat(BONE));sac.rotation.x=Math.PI;put(sac,'Oma sümüyü (Sacrum)',BB,V3(0,.92,-.12),'Os sacrum');
 
-    <div class="info-card" id="infoCard">
-        <h2 id="organTitle">Real Anatomiya Modeli</h2>
-        <p id="organDesc">Müasir 3D Renderinq vasitəsilə insan anatomiyasını bütün tərəflərdən fırladıb yaxınlaşdıra bilərsiniz.</p>
-        <span class="tag" id="organTag">3D Anatomiya</span>
-    </div>
+// Qabırğalar və Döş
+for(let i=0;i<12;i++){
+  const r=.2+.17*Math.sin(((i+1)/12)*Math.PI*.9),arc=Math.PI*1.7;
+  const g=new THREE.TorusGeometry(r,.014,8,44,arc);g.rotateZ(-Math.PI/2-arc/2);
+  const m=new THREE.Mesh(g,mat(BONE));m.rotation.x=Math.PI/2;m.scale.set(1.15,.85,1);
+  put(m,'Qabırğa cütü '+(i+1),BR,V3(0,2.4-i*.085,.02),'Costae')}
+const st=new THREE.Mesh(new THREE.BoxGeometry(.07,.6,.03),mat(BONE));put(st,'Döş sümüyü (Sternum)',BR,V3(0,2.12,.33),'Sternum');
+[-1,1].forEach(s=>{
+  bone('Körpücük sümüyü (Clavicula)',BR,V3(0,2.52,.26),V3(s*.5,2.5,.08),.018,'Clavicula');
+  ell('Kürək sümüyü (Scapula)',BR,BONE,V3(s*.4,2.3,-.2),[.16,.21,.025],'Scapula');
+  bone('Bazu sümüyü (Humerus)',GL,V3(s*.54,2.46,0),V3(s*.62,1.78,0),.035,'Humerus');
+  bone('Şüa sümüyü (Radius)',GL,V3(s*.62,1.76,.02),V3(s*.7,1.12,.1),.025,'Radius');
+  ell('Əl sümükləri (Manus)',GL,BONE,V3(s*.72,.98,.1),[.06,.13,.035],'Manus');
+  ell('Qalça sümüyü (Os ilium)',BB,BONE,V3(s*.26,.98,0),[.3,.22,.1],'Os ilium');
+  bone('Bud sümüyü (Femur)',GL,V3(s*.24,.78,0),V3(s*.3,-.2,.02),.05,'Femur');
+  ell('Diz qapağı (Patella)',GL,BONE,V3(s*.3,-.22,.08),[.05,.06,.03],'Patella');
+  bone('Qamış sümüyü (Tibia)',GL,V3(s*.3,-.3,.02),V3(s*.3,-1.32,0),.04,'Tibia');
+  ell('Ayaq sümükləri (Pes)',GL,BONE,V3(s*.3,-1.42,.12),[.07,.04,.16],'Pes');
+  // Orqanlar
+  lungs.push(ell('Ağciyər (Pulmo)',BR,0xe8a5a5,V3(s*.2,2.1,.02),[.17,.32,.16],'Pulmo'));
+  ell('Böyrək (Ren)',BB,0x8a2a3a,V3(s*.15,1.38,-.1),[.06,.1,.05],'Ren')});
+const heart=ell('Ürək (Cor)',BR,0xc4232f,V3(.08,2.0,.14),[.12,.15,.11],'Cor');
+ell('Qaraciyər (Hepar)',BB,0x8b3a2f,V3(-.16,1.6,.12),[.24,.11,.13],'Hepar');
+ell('Mədə (Gaster)',BB,0xd98a7a,V3(.15,1.56,.13),[.12,.13,.1],'Gaster');
+const si=new THREE.Mesh(new THREE.TorusKnotGeometry(.12,.045,120,10,3,4),mat(0xe9a58f));si.scale.set(1,.8,.8);put(si,'Nazik bağırsaq (Intestinum tenue)',BB,V3(0,1.1,.1),'Intestinum tenue');
+const co=new THREE.Mesh(new THREE.TorusGeometry(.22,.04,12,40),mat(0xc98577));put(co,'Yoğun bağırsaq (Colon)',BB,V3(0,1.12,.06),'Colon');
+ell('Sidik kisəsi (Vesica urinaria)',BB,0xe0c067,V3(0,.76,.12),[.08,.08,.08],'Vesica urinaria');
+ell('Dalaq (Splen)',BB,0x7a2e55,V3(.3,1.62,-.05),[.07,.11,.05],'Splen');
+ell('Mədəaltı vəzi (Pancreas)',BB,0xe0b070,V3(0,1.45,.03),[.2,.035,.05],'Pancreas');
+ell('Öd kisəsi (Vesica biliaris)',BB,0x4a8a3a,V3(-.1,1.5,.2),[.04,.06,.04],'Vesica biliaris');
+ell('Qalxanabənzər vəzi (Glandula thyroidea)',KH,0xb5543f,V3(0,2.6,.12),[.09,.04,.04],'Glandula thyroidea');
+ell('Beyincik (Cerebellum)',KH,0xc98090,V3(0,3.02,-.2),[.16,.1,.12],'Cerebellum');
+ell('Diafraqma (Diaphragma)',BR,0xc77a5a,V3(0,1.78,0),[.38,.03,.28],'Diaphragma').userData.mo=.55;
+put(new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.85,12),mat(0xd48a8a)),'Qida borusu (Oesophagus)',BR,V3(0,2.12,.02),'Oesophagus');
+put(new THREE.Mesh(new THREE.CylinderGeometry(.028,.024,1.2,12),mat(0xb22222)),'Aorta (Hauptschlagader)',BR,V3(.04,1.55,-.03),'Aorta');
 
-    <div class="controls-hint">
-        <span><i class="fas fa-mouse"></i> Fırlatmaq üçün sıxıb saxlayın</span>
-        <span><i class="fas fa-search-plus"></i> Yaxınlaşdırmaq üçün çarxı çevirin</span>
-    </div>
+// Bölgələr və İdarəetmə
+const C0=V3(0,1.6,0),FOC={all:1.3,[KH]:3.0,[BR]:2.1,[BB]:1.1,[GL]:1.3};
+let region=null,sel=null;const fT=V3(0,1.3,0),fC=V3(0,1.3,0);
+const rbox=document.getElementById('regions');
+[KH,BR,BB,GL].forEach(r=>{const b=document.createElement('button');b.className='reg';b.textContent=r;b.onclick=()=>{region=region===r?null:r;follow=false;fT.set(0,FOC[region||'all'],0);dist.t=region?4.6:7.6;document.querySelectorAll('.reg').forEach(x=>x.classList.toggle('on',x.textContent===region))};rbox.append(b)});
+let showB=true,showO=true;
+function mk(t,f,c){const b=document.createElement('button');b.className='reg '+(c||'');b.textContent=t;b.onclick=()=>f(b);rbox.append(b)}
+mk('Bütün Bədən',()=>{region=null;follow=false;fT.set(0,1.3,0);dist.t=7.6;if(sel)setEm(sel,0);sel=null;lab.style.display='none';document.querySelectorAll('.reg').forEach(x=>x.classList.remove('on'))});
+mk('Skelet Aç/Bağla',b=>{showB=!showB;b.classList.toggle('on',!showB)});
+mk('Orqanlar Aç/Bağla',b=>{showO=!showO;b.classList.toggle('on',!showO)});
+mk('☰ Orqanlar',()=>side.classList.toggle('open'),'tgm');
 
-    <div id="canvas-container"></div>
+const VIEWS={Ön:[0,Math.PI/2],Arxa:[Math.PI,Math.PI/2],Yan:[Math.PI/2,Math.PI/2],Perspektiv:[.7,1.25]};
+const vb=document.getElementById('views');
+Object.keys(VIEWS).forEach((k,i)=>{const b=document.createElement('button');b.className='v'+(i==3?' on':'');b.textContent=k;b.onclick=()=>{th.t=VIEWS[k][0];ph.t=VIEWS[k][1];[...vb.children].forEach(x=>x.classList.toggle('on',x===b))};vb.append(b)});
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('canvas-container');
-            
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0b0f19);
+// Kamera
+const th={c:.7,t:.7},ph={c:1.25,t:1.25},dist={c:7.6,t:7.6};
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+const cv=renderer.domElement;let drag=null,moved=0;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};moved=0;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};moved+=Math.abs(dx)+Math.abs(dy);th.t-=dx*.008;th.c=th.t;ph.t=Math.min(Math.PI-.2,Math.max(.2,ph.t-dy*.008));ph.c=ph.t});
+cv.addEventListener('pointerup',e=>{drag=null;if(moved<6)pick(e)});
+cv.addEventListener('wheel',e=>{e.preventDefault();dist.t=Math.min(12,Math.max(2,dist.t+e.deltaY*.005))},{passive:false});
 
-            const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1.2, 3.2);
+// Məlumat Bazası (Azərbaycan Dilində)
+const ray=new THREE.Raycaster(),lab=document.getElementById('label');
+function setEm(o,v){o.traverse(m=>{if(m.material)m.material.emissive=new THREE.Color(v)})}
+function pick(e){
+  ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),cam);
+  const hit=ray.intersectObjects(parts,true).find(h=>{let o=h.object;while(o&&!o.userData.name)o=o.parent;return o&&o.userData.vis!==false&&(!region||o.userData.region===region)});
+  if(sel)setEm(sel,0x000000);sel=null;lab.style.display='none';
+  if(!hit)return;let o=hit.object;while(!o.userData.name)o=o.parent;
+  select(o,true)}
+const side=document.getElementById('side');let follow=false;
+const ORG=new Set(['Cerebrum','Cerebellum','Trachea','Pulmo','Ren','Cor','Hepar','Gaster','Intestinum tenue','Colon','Vesica urinaria','Splen','Pancreas','Vesica biliaris','Oesophagus','Glandula thyroidea','Diaphragma','Aorta']);
+const INFO={
+'Os craniale':['Kəllə sümüyü','Beyni qoruyan sümük qutu; 8 sümükdən ibarətdir və yetkində tikişlərlə bitişib.'],
+'Mandibula':['Alt çənə','Üz skeletinin yeganə hərəkətli sümüyü; çeynəmə və danışıqda iştirak edir.'],
+'Cerebrum':['Baş beyin','Düşüncə, yaddaş, hissiyyat və iradi hərəkətlərin mərkəzi; təxminən 86 milyard neyron var.'],
+'Cerebellum':['Beyincik','Hərəkətlərin əlaqələndirilməsi, tarazlıq və duruşu idarə edir.'],
+'Trachea':['Traxeya (Nəfəs borusu)','Havanı qırtlaqdan ağciyərlərə aparan ~12 sm uzunluqlu, qığırdaq halqalı boru.'],
+'Glandula thyroidea':['Qalxanabənzər vəzi','Boyunda yerləşir; maddələr mübadiləsini tənzimləyən hormonlar ifraz edir.'],
+'Vertebra':['Fəqərələr','Onurğa sütununu əmələ gətirən sümüklər; onurğa beynini qoruyur. 7 boyun, 12 döş, 5 bel fəqərəsi var.'],
+'Os sacrum':['Oma sümüyü','5 fəqərənin birləşməsindən yaranıb; çanağın arxa divarını təşkil edir.'],
+'Costae':['Qabırğalar','12 cüt; ürək və ağciyərləri qoruyur, nəfəs alarkən döş qəfəsini genişləndirir.'],
+'Sternum':['Döş sümüyü','Döş qəfəsinin ön ortasında yastı sümük; qabırğalar ona qığırdaqla birləşir.'],
+'Clavicula':['Körpücük sümüyü','Qolu gövdəyə bağlayan S-şəkilli sümük; çiyni yerində saxlayır.'],
+'Scapula':['Kürək sümüyü','Üçbucaqlı yastı sümük; çiyin oynağını əmələ gətirir və qol əzələlərinə bərkidilmə yeri verir.'],
+'Humerus':['Bazu sümüyü','Qolun ən uzun sümüyü; çiyindən dirsəyə qədər uzanır.'],
+'Radius':['Şüa sümüyü','Dirsəkdən biləyə qədər baş barmaq tərəfindəki ön qol sümüyü.'],
+'Manus':['Əl sümükləri','27 sümükdən ibarətdir; incə və güclü tutma hərəkətlərini təmin edir.'],
+'Os ilium':['Qalça (Çanaq) sümüyü','Çanağın geniş yan hissəsi; bədən çəkisini ayaqlara ötürür və daxili orqanları dəstəkləyir.'],
+'Femur':['Bud sümüyü','Bədənin ən uzun və ən güclü sümüyü.'],
+'Patella':['Diz qapağı','Diz oynağını qoruyan kiçik sümük; bud əzələsinin qüvvəsini artırır.'],
+'Tibia':['Qamış sümüyü','Baldırın əsas daşıyıcı sümüyü; bədən çəkisinin böyük hissəsini daşıyır.'],
+'Pes':['Ayaq sümükləri','26 sümükdən ibarətdir; tarazlıq, yeriş və qaçışı təmin edir.'],
+'Pulmo':['Ağciyər','Qaz mübadiləsi orqanı: oksigen qana keçir, karbon qazı xaric olunur. ~300 milyon alveol var.'],
+'Diaphragma':['Diafraqma','Döş və qarın boşluqlarını ayıran əsas tənəffüs əzələsi.'],
+'Cor':['Ürək','Qanı bütün bədənə vuran əzələ nasosu; gündə təxminən 100 000 dəfə döyünür.'],
+'Aorta':['Aorta','Bədənin ən böyük arteriyası; oksigenli qanı ürəkdən orqanlara paylayır.'],
+'Oesophagus':['Qida borusu','Qidanı udlaqdan mədəyə daşıyan ~25 sm əzələ borusu.'],
+'Hepar':['Qaraciyər','Ən böyük daxili orqan: öd istehsal edir, zəhərləri təmizləyir, qlükozanı saxlayır.'],
+'Vesica biliaris':['Öd kisəsi','Qaraciyərin istehsal etdiyi ödü toplayır və yağların həzmi üçün bağırsağa buraxır.'],
+'Gaster':['Mədə','Qidanı mədə şirəsi və turşu ilə parçalayan əzələli kisə.'],
+'Pancreas':['Mədəaltı vəzi','Həzm fermentləri və qan şəkərini tənzimləyən insulin istehsal edir.'],
+'Splen':['Dalaq','Qanı süzür, köhnə qırmızı qan hüceyrələrini məhv edir, immunitetdə iştirak edir.'],
+'Ren':['Böyrək','Qanı süzür, sidik əmələ gətirir, su-duz tarazlığını və qan təzyiqini tənzimləyir.'],
+'Intestinum tenue':['Nazik bağırsaq','~6 metr uzunluğunda; qida maddələrinin əsas hissəsi burada qana sorulur.'],
+'Colon':['Yoğun bağırsaq','Suyu sorur və qalıqlardan nəcis formalaşdırır.'],
+'Vesica urinaria':['Sidik kisəsi','Sidiyi toplayıb saxlayır; tutumu təxminən 400-500 ml-dir.']};
 
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            container.appendChild(renderer.domElement);
+function select(o,fly){
+  if(sel)setEm(sel,0);sel=o;setEm(o,0x2a3f99);
+  const i=INFO[o.userData.sub]||[o.userData.name,''];
+  lab.innerHTML='<b>'+i[0]+'</b><small>'+o.userData.name+' · '+o.userData.region+'</small>'+i[1];lab.style.display='block';
+  document.querySelectorAll('.it').forEach(x=>x.classList.toggle('on',x.dataset.k===o.userData.sub));
+  if(fly){follow=true;fT.copy(o.position);const s=new THREE.Box3().setFromObject(o).getSize(V3()).length();dist.t=Math.min(7,Math.max(1.5,s*3.2));side.classList.remove('open')}}
 
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.target.set(0, 1, 0);
+const list=document.getElementById('list'),q=document.getElementById('q');
+function build(f){list.innerHTML='';Object.keys(INFO).forEach(k=>{const p=parts.find(x=>x.userData.sub===k);if(!p||(f&&!(INFO[k][0]+k).toLowerCase().includes(f)))return;const d=document.createElement('div');d.className='it';d.dataset.k=k;d.innerHTML=INFO[k][0]+'<small>'+k+' · '+p.userData.region+'</small>';d.onclick=()=>{region=null;document.querySelectorAll('.reg').forEach(x=>x.classList.remove('on'));select(p,true)};list.append(d)})}
+q.oninput=()=>build(q.value.toLowerCase());build('');
 
-            // İşıqlandırma
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
-            scene.add(ambientLight);
+// Dağıtma (Explosion)
+const ex=document.getElementById('ex');let eT=0,eC=0;
+ex.oninput=()=>eT=ex.value/100;
+document.getElementById('reset').onclick=()=>{eT=0;ex.value=0};
 
-            const dirLight1 = new THREE.DirectionalLight(0xffffff, 2);
-            dirLight1.position.set(5, 10, 7);
-            scene.add(dirLight1);
-
-            const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 1.5);
-            dirLight2.position.set(-5, -5, -5);
-            scene.add(dirLight2);
-
-            let loadedModel;
-
-            // Həqiqi 3D Anatomiya GLTF Modelinin Yüklənməsi
-            const loader = new THREE.GLTFLoader();
-            loader.load('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/LeePerrySmith/glTF-Binary/LeePerrySmith.glb', 
-                (gltf) => {
-                    loadedModel = gltf.scene;
-                    loadedModel.scale.set(0.2, 0.2, 0.2);
-                    loadedModel.position.set(0, 0.8, 0);
-                    
-                    // Qızılı/Anatomik Material Effekti
-                    loadedModel.traverse((child) => {
-                        if (child.isMesh) {
-                            child.material.color.setHex(0xe2e8f0);
-                            child.material.roughness = 0.3;
-                            child.material.metalness = 0.2;
-                        }
-                    });
-
-                    scene.add(loadedModel);
-                    document.getElementById('loader').style.display = 'none';
-                },
-                (xhr) => {
-                    let percent = Math.round((xhr.loaded / xhr.total) * 100);
-                    if(percent) document.getElementById('loader').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Yüklənir: ${percent}%`;
-                },
-                (error) => {
-                    document.getElementById('loader').innerHTML = "Model yüklənərkən xəta baş verdi";
-                }
-            );
-
-            // Məlumatlar
-            const organData = {
-                brain: { title: "Kəllə və Beyin Təbəqəsi", desc: "Mərkəzi sinir sisteminin və kəllə sümüyünün daxili quruluşu.", tag: "Mərkəzi Sinir Sistemi", pos: [0, 1.5, 1.2], target: [0, 1.5, 0] },
-                heart: { title: "Ürək və Tənəffüs Zonası", desc: "Döş qəfəsi daxilində yerləşən vital orqanlar.", tag: "Qan-Damar Sistemi", pos: [0, 1.1, 1.2], target: [0, 1.1, 0] },
-                organs: { title: "Qarın Boşluğu Orqanları", desc: "Mədə, qaraciyər, bağırsaqlar və böyrəklər zonasının görünüşü.", tag: "Həzm Sistemi", pos: [0, 0.7, 1.2], target: [0, 0.7, 0] },
-                skeleton: { title: "Sümük və Dayaq Sistemi", desc: "Bədənin əsas karkası və onurğa sütunu.", tag: "Dayaq-Hərəkət", pos: [0, 1.0, 2.2], target: [0, 1.0, 0] }
-            };
-
-            function setFocus(key) {
-                const data = organData[key];
-                if (!data) return;
-
-                document.querySelectorAll('.system-btn').forEach(btn => btn.classList.remove('active'));
-
-                camera.position.set(data.pos[0], data.pos[1], data.pos[2]);
-                controls.target.set(data.target[0], data.target[1], data.target[2]);
-
-                document.getElementById('organTitle').innerText = data.title;
-                document.getElementById('organDesc').innerText = data.desc;
-                document.getElementById('organTag').innerText = data.tag;
-            }
-
-            document.getElementById('btn-brain').addEventListener('click', (e) => { e.currentTarget.classList.add('active'); setFocus('brain'); });
-            document.getElementById('btn-heart').addEventListener('click', (e) => { e.currentTarget.classList.add('active'); setFocus('heart'); });
-            document.getElementById('btn-organs').addEventListener('click', (e) => { e.currentTarget.classList.add('active'); setFocus('organs'); });
-            document.getElementById('btn-skeleton').addEventListener('click', (e) => { e.currentTarget.classList.add('active'); setFocus('skeleton'); });
-            document.getElementById('btn-reset').addEventListener('click', (e) => {
-                document.querySelectorAll('.system-btn').forEach(btn => btn.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                camera.position.set(0, 1.2, 3.2);
-                controls.target.set(0, 1, 0);
-            });
-
-            function animate() {
-                requestAnimationFrame(animate);
-                if (loadedModel) loadedModel.rotation.y += 0.003;
-                controls.update();
-                renderer.render(scene, camera);
-            }
-            animate();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        });
-    </script>
+function loop(){
+  requestAnimationFrame(loop);
+  eC+=(eT-eC)*.12;th.c+=(th.t-th.c)*.1;ph.c+=(ph.t-ph.c)*.1;dist.c+=(dist.t-dist.c)*.1;if(follow&&sel)fT.copy(sel.position);fC.lerp(fT,.08);
+  parts.forEach(o=>{
+    const b=o.userData.base,d=b.clone().sub(C0);
+    o.position.copy(b).addScaledVector(d,eC*1.1);
+    const u=o.userData,on=!region||u.region===region,vis=ORG.has(u.sub)?showO:showB;u.vis=vis;const op=on?(u.mo||1):.1;
+    o.traverse(m=>{if(m.material){m.material.opacity+=(op-m.material.opacity)*.15}});o.visible=vis});
+  const t=performance.now()/1000,k=1+.09*Math.pow(Math.max(0,Math.sin(t*7)),3),br=Math.sin(t*1.6);
+  heart.scale.set(.12*k,.15*k,.11*k);lungs.forEach(l=>l.scale.set(.17*(1+.04*br),.32*(1+.07*br),.16*(1+.05*br)));
+  cam.position.set(fC.x+dist.c*Math.sin(ph.c)*Math.sin(th.c),fC.y+dist.c*Math.cos(ph.c),fC.z+dist.c*Math.sin(ph.c)*Math.cos(th.c));
+  cam.lookAt(fC);renderer.render(scene,camera||cam)}
+loop();
+</script>
 </body>
 </html>
