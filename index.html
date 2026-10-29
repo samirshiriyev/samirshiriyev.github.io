@@ -36,4 +36,381 @@
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding:
+            padding: 15px 25px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .app-header h1 {
+            font-size: 18px;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-header p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* Sol Sistem Seçim Menyusu */
+        .system-menu {
+            position: absolute;
+            top: 110px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .system-btn {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .system-btn:hover, .system-btn.active {
+            background: #0284c7;
+            color: #fff;
+            border-color: #38bdf8;
+            transform: translateX(5px);
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.4);
+        }
+
+        /* Sağ Məlumat Kartı */
+        .info-card {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 320px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .info-card h2 {
+            font-size: 16px;
+            color: #38bdf8;
+            margin-bottom: 8px;
+        }
+
+        .info-card p {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .info-card .tag {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* 3D Səhnə Zəmini */
+        #canvas-container {
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* İdarəetmə Göstərişləri */
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 15px;
+        }
+
+        .controls-hint span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .info-card {
+                width: 90%;
+                right: 5%;
+                top: auto;
+                bottom: 60px;
+            }
+            .system-menu {
+                top: auto;
+                bottom: 80px;
+                flex-direction: row;
+                overflow-x: auto;
+                width: 90%;
+            }
+            .system-btn {
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="app-header">
+        <h1><i class="fas fa-heartbeat"></i> 3D Anatomiya Atlası</h1>
+        <p>Ayrı-ayrı orqan və sistemləri seçib detalında yaxınlaşdırın</p>
+    </div>
+
+    <!-- Sistem Menyusu -->
+    <div class="system-menu">
+        <button class="system-btn active" onclick="focusOrgan('brain')">
+            <i class="fas fa-brain"></i> Beyin & Əsəb Sistemi
+        </button>
+        <button class="system-btn" onclick="focusOrgan('heart')">
+            <i class="fas fa-heart"></i> Ürək & Qan-Damar
+        </button>
+        <button class="system-btn" onclick="focusOrgan('lungs')">
+            <i class="fas fa-lungs"></i> Ciyərlər & Tənəffüs
+        </button>
+        <button class="system-btn" onclick="focusOrgan('skeleton')">
+            <i class="fas fa-bone"></i> Sümük Sistemi
+        </button>
+        <button class="system-btn" onclick="resetCamera()">
+            <i class="fas fa-compress-arrows-alt"></i> Ümumi Görünüş
+        </button>
+    </div>
+
+    <!-- Məlumat Paneli -->
+    <div class="info-card" id="infoCard">
+        <h2 id="organTitle">Orqan Adı</h2>
+        <p id="organDesc">Məlumat yüklənir...</p>
+        <span class="tag" id="organTag">Mərkəzi Sistem</span>
+    </div>
+
+    <!-- İdarə İpucları -->
+    <div class="controls-hint">
+        <span><i class="fas fa-mouse"></i> Fırlatmaq üçün sıxıb saxlayın</span>
+        <span><i class="fas fa-search-plus"></i> Yaxınlaşdırmaq üçün çarxı (scroll) çevirin</span>
+    </div>
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <script>
+        // Səhnə, Kamera və Render ayarları
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020617, 0.05);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.5, 6);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // İdarəetmə (Orbit Controls - Fırlatma və Yaxınlaşdırma)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 12;
+        controls.minDistance = 1;
+
+        // İşıqlandırma
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0x38bdf8, 2, 50);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        const redLight = new THREE.PointLight(0xef4444, 1.5, 50);
+        redLight.position.set(-5, 0, 5);
+        scene.add(redLight);
+
+        // Anatomik Modellər Qrupu
+        const anatomyGroup = new THREE.Group();
+        scene.add(anatomyGroup);
+
+        // Orqan məlumat bazası
+        const organData = {
+            brain: {
+                title: "Mərkəzi Beyin",
+                desc: "İnsan bədəninin əsas idarəetmə mərkəzi. 86 milyarddan çox neyrondan ibarətdir, bütün hərəkətləri və düşüncələri tənzimləyir.",
+                tag: "Neyron Sistemi",
+                pos: { x: 0, y: 3.2, z: 0 },
+                color: 0xec4899,
+                size: 0.4
+            },
+            heart: {
+                title: "Ürək",
+                desc: "Qan-damar sisteminin mərkəzi pompası. Günde təxminən 100,000 dəfə vuraraq bütün bədənə oksigen və qida maddələri paylayır.",
+                tag: "Qan-Damar Sistemi",
+                pos: { x: 0.1, y: 1.8, z: 0.1 },
+                color: 0xef4444,
+                size: 0.35
+            },
+            lungs: {
+                title: "Ağciyərlər",
+                desc: "Tənəffüs sisteminin əsas orqanı. Havadakı oksigeni qana ötürür və karbon qazını bədəndən xaric edir.",
+                tag: "Tənəffüs Sistemi",
+                pos: { x: 0, y: 1.9, z: 0 },
+                color: 0x38bdf8,
+                size: 0.6
+            },
+            skeleton: {
+                title: "Onurğa və Sümük Sistemi",
+                desc: "Bədənin dayaq-hərəkət aparatıdır. 206 ədəd sümükdən ibarətdir, daxili orqanları mühafizə edir.",
+                tag: "Dayaq-Hərəkət",
+                pos: { x: 0, y: 1.2, z: 0 },
+                color: 0xe2e8f0,
+                size: 1.2
+            }
+        };
+
+        // Bədənin Siluetini Yaratmaq (3D Vizual)
+        function createAnatomyModel() {
+            // Baş / Beyin
+            const brainGeo = new THREE.SphereGeometry(0.35, 32, 32);
+            const brainMat = new THREE.MeshPhongMaterial({ color: 0xec4899, wireframe: false, roughness: 0.3 });
+            const brainMesh = new THREE.Mesh(brainGeo, brainMat);
+            brainMesh.position.set(0, 3.2, 0);
+            brainMesh.userData = { id: 'brain' };
+            anatomyGroup.add(brainMesh);
+
+            // Ürək
+            const heartGeo = new THREE.DodecahedronGeometry(0.25, 2);
+            const heartMat = new THREE.MeshPhongMaterial({ color: 0xef4444, emissive: 0x7f1d1d });
+            const heartMesh = new THREE.Mesh(heartGeo, heartMat);
+            heartMesh.position.set(0.1, 1.8, 0.1);
+            heartMesh.userData = { id: 'heart' };
+            anatomyGroup.add(heartMesh);
+
+            // Ağciyərlər (Sol və Sağ)
+            const lungGeo = new THREE.CapsuleGeometry(0.2, 0.5, 8, 16);
+            const lungMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.7 });
+            
+            const lungLeft = new THREE.Mesh(lungGeo, lungMat);
+            lungLeft.position.set(-0.35, 1.9, 0);
+            anatomyGroup.add(lungLeft);
+
+            const lungRight = new THREE.Mesh(lungGeo, lungMat);
+            lungRight.position.set(0.35, 1.9, 0);
+            anatomyGroup.add(lungRight);
+
+            // Onurğa Sütunu (Sümük sistemi)
+            const spineGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.8, 16);
+            const spineMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.2 });
+            const spineMesh = new THREE.Mesh(spineGeo, spineMat);
+            spineMesh.position.set(0, 1.5, -0.1);
+            spineMesh.userData = { id: 'skeleton' };
+            anatomyGroup.add(spineMesh);
+
+            // Bədən Karkası (Holoqram Tora bənzər)
+            const bodyGeo = new THREE.CylinderGeometry(0.6, 0.3, 3.5, 16);
+            const bodyMat = new THREE.MeshBasicMaterial({ color: 0x1e293b, wireframe: true, transparent: true, opacity: 0.3 });
+            const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+            bodyMesh.position.set(0, 1.6, 0);
+            anatomyGroup.add(bodyMesh);
+        }
+
+        createAnatomyModel();
+
+        // Kamera Fokuslaşma və Yaxınlaşdırma Funksiyası
+        function focusOrgan(organKey) {
+            const data = organData[organKey];
+            if (!data) return;
+
+            // Aktiv düymə stilini dəyişmək
+            document.querySelectorAll('.system-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Kameranı seçilmiş orqana doğru rəvan sürüşdürmək (GSAP style animation)
+            const targetPos = data.pos;
+            
+            let startPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+            let endPos = { x: targetPos.x, y: targetPos.y + 0.2, z: targetPos.z + 1.8 };
+
+            let startTime = null;
+            function animateCamera(timestamp) {
+                if (!startTime) startTime = timestamp;
+                let progress = (timestamp - startTime) / 1000;
+
+                if (progress < 1) {
+                    camera.position.x = startPos.x + (endPos.x - startPos.x) * progress;
+                    camera.position.y = startPos.y + (endPos.y - startPos.y) * progress;
+                    camera.position.z = startPos.z + (endPos.z - startPos.z) * progress;
+                    controls.target.set(targetPos.x, targetPos.y, targetPos.z);
+                    requestAnimationFrame(animateCamera);
+                } else {
+                    camera.position.set(endPos.x, endPos.y, endPos.z);
+                    controls.target.set(targetPos.x, targetPos.y, targetPos.z);
+                }
+            }
+            requestAnimationFrame(animateCamera);
+
+            // Məlumat Kartını Göstərmək
+            document.getElementById('infoCard').style.display = 'block';
+            document.getElementById('organTitle').innerText = data.title;
+            document.getElementById('organDesc').innerText = data.desc;
+            document.getElementById('organTag').innerText = data.tag;
+        }
+
+        // Kameranı Sıfırlayıb Bütün Bədəni Göstərmək
+        function resetCamera() {
+            document.querySelectorAll('.system-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            camera.position.set(0, 1.5, 6);
+            controls.target.set(0, 1.5, 0);
+            document.getElementById('infoCard').style.display = 'none';
+        }
+
+        // Təbii Animasiya Dövrəsi
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Yüngül fırlanma effekti
+            anatomyGroup.rotation.y += 0.003;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Ekran Ölçüsü Dəyişdikdə Uyğunlaşdırma (Responsive)
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
